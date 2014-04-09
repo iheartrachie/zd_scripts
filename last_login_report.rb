@@ -4,6 +4,7 @@ CSV fields include the user's ID, their name, their role, and their last login t
 This uses the Users endpoint. More info at http://developer.zendesk.com/documentation/rest_api/users.html
 
 Rachel Wolthuis
+Zendesk
 March 2014
 =end
 
