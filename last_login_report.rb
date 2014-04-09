@@ -1,3 +1,12 @@
+=begin
+This script creates a CSV of all the users in the specified account(s).
+CSV fields include the user's ID, their name, their role, and their last login time.
+This uses the Users endpoint. More info at http://developer.zendesk.com/documentation/rest_api/users.html
+
+Rachel Wolthuis
+March 2014
+=end
+
 require 'open-uri'
 require 'json'
 require 'csv'
@@ -12,8 +21,8 @@ class Export
       :email     => '<email address>', #email address of admin
       :api_token => '<token>' #account API token
     }
-    #uncomment the block below to add another account
-    #the block can be copied and pasted
+    #uncomment the block below to add another account.
+    #the block can be compied and pasted
 
     # ,# account two
     # {
