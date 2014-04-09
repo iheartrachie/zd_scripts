@@ -3,7 +3,6 @@ This script will suspend all Agents in the account(s) listed.
 This uses the Users endpoint. More info at http://developer.zendesk.com/documentation/rest_api/users.html
 
 Rachel Wolthuis
-Zendesk
 April 2014
 =end
 
@@ -55,7 +54,8 @@ class Suspend
 
     agent_ids = users_array.map do |user|
       {
-        :id => user['id']
+        :id => user['id'],
+        :role => user['role']
       }
     end
 
@@ -69,13 +69,18 @@ class Suspend
     bar       = ProgressBar.new(agents.length)
 
     agents.each do |agent|
-      #Right now I'm just using curb to get the agent. How do I do a put call?
-      c = Curl::Easy.new("https://#{subdomain}.zendesk.com/api/v2/users/#{agent[:id]}.json")
-      c.http_auth_types = :basic
-      c.username = "#{email}/token"
-      c.password = token
-      c.perform
-      puts c.body_str
+      if(agent[:role] == 'agent')
+        #Right now I'm just using curb to get the agent. How do I do a PUT call?
+        #Pagination?
+        c = Curl::Easy.new("https://#{subdomain}.zendesk.com/api/v2/users/#{agent[:id]}.json")
+        c.http_auth_types = :basic
+        c.username = "#{email}/token"
+        c.password = token
+        c.perform
+        puts c.body_str
+      else
+        puts "Uh oh! User #{agent[:id]} is an #{agent[:role]}, not an Agent. User skipped."
+      end
 
       sleep 0.1 #progress bar
       bar.increment!
