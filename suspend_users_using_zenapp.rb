@@ -52,10 +52,16 @@ class Suspend
 
     #couldn't figure out how to get the agent & admins back using the app
     #need to paginate the results so that additional users are added to the agent_ids array
+    #see next_page items below
+
     url = "https://#{subdomain}.zendesk.com/api/v2/users.json?role[]=agent&role[]=admin"
     result = open(url, :http_basic_authentication => ["#{email}/token", token])
-
+    #next_page = JSON.parse(result.read)["next_page"]
     users_array = JSON.parse(result.read)["users"]
+
+    # while (next_page != null)
+    #   users_arra << JSON.parse(result.read)["users"
+    # end
 
     agent_ids = users_array.map do |user|
       {
