@@ -1,5 +1,5 @@
 =begin
-This script will suspend all Agents in the account(s) listed.
+This script will suspend all Agents and Admins (non-owners) in the account(s) listed.
 This uses the Users endpoint. More info at http://developer.zendesk.com/documentation/rest_api/users.html
 
 Rachel Wolthuis
@@ -17,7 +17,7 @@ class Suspend
   ACCOUNTS = [
     # account one
     {
-      :subdomain => '<domain>', #eg: 'support' if url is support.zendesk.com
+      :subdomain => '<subdomain>', #eg: 'support' if url is support.zendesk.com
       :email     => '<email>', #email address of admin
       :api_token => '<token>', #account API token
       :owner_id  => <user_id> #user_id for the owner of the account
@@ -39,7 +39,7 @@ class Suspend
 
   def fetch!
     ACCOUNTS.each do |account|
-      puts "-- Suspending all Agents on #{account[:subdomain]}.zendesk.com ---"
+      puts "-- Creating a list of agents & admins to suspend on #{account[:subdomain]}.zendesk.com --"
       agents = get_agents_for(account)
       suspend_agents_for(account, agents)
     end
@@ -50,29 +50,24 @@ class Suspend
     email     = account[:email]
     token     = account[:api_token]
 
-    #couldn't figure out how to get the agent & admins back using the app
-    #need to paginate the results so that additional users are added to the agent_ids array
-    #see next_page items below
-
     url = "https://#{subdomain}.zendesk.com/api/v2/users.json?role[]=agent&role[]=admin"
     result = open(url, :http_basic_authentication => ["#{email}/token", token])
-    #next_page = JSON.parse(result.read)["next_page"] <-- not sure the syntax to get that url
-    users_array = JSON.parse(result.read)["users"]
+    returned = JSON.parse(result.read)
+    next_page = returned['next_page']
+    users_array = returned['users']
 
-    # while (next_page != null)
-    #   open(next_page, :http_basic_authentication => ["#{email}/token", token])
-    #   users_array << JSON.parse(result.read)["users"]
-    # end
-
-    agent_ids = users_array.map do |user|
-      {
-        :id => user['id'],
-        :role => user['role']
-      }
+    while (next_page != nil)
+      result_next = open(next_page, :http_basic_authentication => ["#{email}/token", token])
+      returned_next = JSON.parse(result_next.read)
+      next_page = returned_next['next_page']
+      returned_next['users'].each do |user|
+        users_array << user
+      end
+      
     end
 
-    return agent_ids
-    puts agent_ids.each(agent_id[:id])
+    puts "-- #{users_array.length} agents & admins to be suspended on #{account[:subdomain]}.zendesk.com --"
+    return users_array
   end
 
   def suspend_agents_for(account, agents)
@@ -89,19 +84,21 @@ class Suspend
       config.token = token
     end
 
+    puts "-- Suspending all admins & agents on #{account[:subdomain]}.zendesk.com --"
+
     agents.each do |agent|
-      if(agent[:role] != 'end-user' && agent[:id] != owner)
-        found_user = client.users.find(:id => agent[:id])
-        found_user.suspended = false
+      if(agent['role'] != 'end-user' && agent['id'] != owner)
+        found_user = client.users.find(:id => agent['id'])
+        found_user.suspended = true
         found_user.save
         suspended_agents += 1
       else
-        puts "User #{agent[:id]} is an end-user or and the Owner, not an Agent/Admin. User skipped."
+        puts "!! User #{agent['id']} is an end-user or the Owner. User skipped. !!"
       end
         sleep 0.1 #progress bar
         bar.increment! 
     end
-    puts "-- #{suspended_agents} Agents suspended! --"
+    puts "-- #{suspended_agents} admins & agents on #{account[:subdomain]}.zendesk.com have been suspended --"
 
   end
 
