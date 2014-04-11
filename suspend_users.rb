@@ -41,6 +41,7 @@ class Suspend
     ACCOUNTS.each do |account|
       puts "-- Creating a list of agents & admins to suspend on #{account[:subdomain]}.zendesk.com --"
       agents = get_agents_for(account)
+      puts "-- #{agents.length} agents & admins to be suspended on #{account[:subdomain]}.zendesk.com --"
       suspend_agents_for(account, agents)
     end
   end
@@ -60,13 +61,13 @@ class Suspend
       result_next = open(next_page, :http_basic_authentication => ["#{email}/token", token])
       returned_next = JSON.parse(result_next.read)
       next_page = returned_next['next_page']
+      
       returned_next['users'].each do |user|
         users_array << user
       end
       
     end
 
-    puts "-- #{users_array.length} agents & admins to be suspended on #{account[:subdomain]}.zendesk.com --"
     return users_array
   end
 
