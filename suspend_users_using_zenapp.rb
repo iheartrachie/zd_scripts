@@ -56,11 +56,12 @@ class Suspend
 
     url = "https://#{subdomain}.zendesk.com/api/v2/users.json?role[]=agent&role[]=admin"
     result = open(url, :http_basic_authentication => ["#{email}/token", token])
-    #next_page = JSON.parse(result.read)["next_page"]
+    #next_page = JSON.parse(result.read)["next_page"] <-- not sure the syntax to get that url
     users_array = JSON.parse(result.read)["users"]
 
     # while (next_page != null)
-    #   users_arra << JSON.parse(result.read)["users"
+    #   open(next_page, :http_basic_authentication => ["#{email}/token", token])
+    #   users_array << JSON.parse(result.read)["users"]
     # end
 
     agent_ids = users_array.map do |user|
