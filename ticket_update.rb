@@ -16,11 +16,11 @@ def update_tickets_for
   #########################
   # Insert your info here #
   #########################
-  subdomain   = 'greendale' # eg: 'support' if url is support.zendesk.com
-  email       = 'rwolthuis@zendesk.com' # email address of admin
-  token       = 'fqe2QE0CFOXQqCwbvq01jlS8NAeFgC6MTvRbtENB' # account API token
-  ticket_num  = 67 # ticket to update
-  update_num  = 3 # number of updates to the ticket
+  subdomain   = '<subdomain>' # eg: 'support' if url is support.zendesk.com
+  email       = '<email>' # email address of admin
+  token       = '<token>' # account API token
+  ticket_num  = <ticket_num> # ticket to update
+  update_num  = <update_num> # number of updates to the ticket
 
   bar = ProgressBar.new(update_num) # progress bar
   updated_tickets = 1 # counter for *actual* updated tickets
